@@ -23,20 +23,26 @@
   </style>
 </head>
 <body>
+<div class="music-player">
+  <button onclick="toggleMusic()" id="musicBtn">▶</button>
+</div>
+
 <audio id="bgm" loop>
   <source src="estetik.mp3" type="audio/mpeg">
 </audio>
-
-<button onclick="playMusic()">▶ Play Music</button>
-<button onclick="pauseMusic()">⏸ Pause</button>
-
-<script>
+  <script>
   const bgm = document.getElementById('bgm');
-  function playMusic() {
-    bgm.play();
-  }
-  function pauseMusic() {
-    bgm.pause();
+  const btn = document.getElementById('musicBtn');
+  bgm.volume = 0.2;
+
+  function toggleMusic() {
+    if (bgm.paused) {
+      bgm.play();
+      btn.innerHTML = "⏸";
+    } else {
+      bgm.pause();
+      btn.innerHTML = "▶";
+    }
   }
 </script>
 <div class="card">
