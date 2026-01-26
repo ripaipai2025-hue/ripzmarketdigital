@@ -20,70 +20,6 @@
     .btn-telegram{background:#00ffd5;color:#000}
     .btn-wa{border:1px solid #00ffd5;color:#00ffd5}
     footer{text-align:center;font-size:11px;opacity:.6;margin-top:14px}
-    .music-btn.playing {
-  animation: pulse 1.2s infinite;
-  background: linear-gradient(135deg, #00ffcc, #00bfa5);
-  color: #000;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-   .music-player {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
-}
-
-   .music-btn {
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  font-size: 20px;
-  color: #000;
-  background: linear-gradient(135deg, #00ffd5, #00bfa5);
-  box-shadow: 0 0 15px rgba(0,255,213,.6);
-  transition: all 0.3s ease;
-}
-
-   .music-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 25px rgba(0,255,213,.9);
-}
-
-   .music-btn:active {
-  transform: scale(0.95);
-}
-  </style>
-</head>
-<body>
-<div class="music-player">
-<button onclick="toggleMusic()" id="musicBtn" class="music-btn">🎵</button></div>
-<audio id="bgm" loop>
-  <source src="sadboyz.mp3" type="audio/mpeg">
-</audio>
-  <script>
-const bgm = document.getElementById('bgm');
-const btn = document.getElementById('musicBtn');
-
-bgm.volume = 0.2;
-
-function toggleMusic() {
-  if (bgm.paused) {
-    bgm.play();
-    btn.innerHTML = "🎵";
-    btn.classList.add("playing");
-  } else {
-    bgm.pause();
-    btn.innerHTML = "🎵";
-    btn.classList.remove("playing");
-  }
-}
   </script>
   </body>
 </html>
@@ -190,13 +126,4 @@ function toggle(el){
 </script>
 </body>
 </html>
-<!-- MAIN JAVA SCRIPT -->
-<script src="./script.js"></script>
-</body>
-<div class="progress">
-  <div id="progress-bar"></div>
-</div>
-</html>
-<p id="loading-details"></p>
-document.getElementById('progress-bar');
-document.getElementById('loading-details');
+  
