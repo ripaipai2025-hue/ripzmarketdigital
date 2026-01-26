@@ -26,67 +26,54 @@
 <div class="music-player">
   <button onclick="toggleMusic()" id="musicBtn">▶</button>
 </div>
+<style>
+  .music-player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
 
+.music-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #000;
+  background: linear-gradient(135deg, #00ffd5, #00bfa5);
+  box-shadow: 0 0 15px rgba(0,255,213,.6);
+  transition: all 0.3s ease;
+}
+
+.music-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px rgba(0,255,213,.9);
+}
+
+.music-btn:active {
+  transform: scale(0.95);
+}
 <audio id="bgm" loop>
   <source src="sadboyz.mp3" type="audio/mpeg">
 </audio>
   <script>
-  const bgm = document.getElementById('bgm');
-  const btn = document.getElementById('musicBtn');
-  bgm.volume = 0.2;
+const bgm = document.getElementById('bgm');
+const btn = document.getElementById('musicBtn');
 
-  function toggleMusic() {
-    if (bgm.paused) {
-      bgm.play();
-      btn.innerHTML = "⏸";
-    } else {
-      bgm.pause();
-      btn.innerHTML = "▶";
-    }
+bgm.volume = 0.2;
+
+function toggleMusic() {
+  if (bgm.paused) {
+    bgm.play();
+    btn.innerHTML = "⏸";
+  } else {
+    bgm.pause();
+    btn.innerHTML = "▶";
   }
-  body
-    .music-player {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
 }
-
-/* Tombol utama */
-.music-player button {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: none;
-  background: linear-gradient(135deg, #00f2fe, #4facfe);
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 200, 255, 0.4);
-  transition: all 0.3s ease;
-}
-
-/* Hover effect */
-.music-player button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 12px 30px rgba(0, 200, 255, 0.7);
-}
-
-/* Klik effect */
-.music-player button:active {
-  transform: scale(0.95);
-}
-
-/* Tombol play khusus */
-#play {
-  background: linear-gradient(135deg, #00ff9c, #00c9ff);
-}
-
-/* Tombol pause khusus */
-#pause {
-  background: linear-gradient(135deg, #ff4e50, #f9d423);
-}
+</script>
   </body>
 </script>
 <div class="card">
