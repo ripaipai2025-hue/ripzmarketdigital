@@ -65,7 +65,7 @@
 </head>
 <body>
 <div class="music-player">
-<button onclick="toggleMusic()" id="musicBtn" class="music-btn">▶</button></div>
+<button onclick="toggleMusic()" id="musicBtn" class="music-btn">🎵</button></div>
 <audio id="bgm" loop>
   <source src="sadboyz.mp3" type="audio/mpeg">
 </audio>
@@ -78,11 +78,11 @@ bgm.volume = 0.2;
 function toggleMusic() {
   if (bgm.paused) {
     bgm.play();
-    btn.innerHTML = "⏸";
+    btn.innerHTML = "🎵";
     btn.classList.add("playing");
   } else {
     bgm.pause();
-    btn.innerHTML = "▶";
+    btn.innerHTML = "🎵";
     btn.classList.remove("playing");
   }
 }
