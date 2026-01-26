@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RipzDigitalMarket | Premium Service</title>
   <style>
+    .music-btn.playing {
+  animation: pulse 1.2s infinite;
+  background: linear-gradient(135deg, #00ffcc, #00bfa5);
+  color: #000;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
   .music-player {
   position: fixed;
   bottom: 20px;
@@ -71,9 +82,11 @@ function toggleMusic() {
   if (bgm.paused) {
     bgm.play();
     btn.innerHTML = "⏸";
+    btn.classList.add("playing");
   } else {
     bgm.pause();
     btn.innerHTML = "▶";
+    btn.classList.remove("playing");
   }
 }
   </script>
