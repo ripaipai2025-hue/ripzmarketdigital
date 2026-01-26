@@ -48,6 +48,45 @@
   <body>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
+        .music-btn.playing {
+  animation: pulse 1.2s infinite;
+  background: linear-gradient(135deg, #00ffcc, #00bfa5);
+  color: #000;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+  .music-player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+
+.music-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #000;
+  background: linear-gradient(135deg, #00ffd5, #00bfa5);
+  box-shadow: 0 0 15px rgba(0,255,213,.6);
+  transition: all 0.3s ease;
+}
+
+.music-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px rgba(0,255,213,.9);
+}
+
+.music-btn:active {
+  transform: scale(0.95);
+}
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
     body{min-height:100vh;background:radial-gradient(circle at top,#0fffc1,#0a0a0a 40%);color:#fff;display:flex;justify-content:center;align-items:center;padding:20px}
     .card{width:100%;max-width:430px;background:rgba(0,0,0,.8);border-radius:22px;padding:28px 22px;box-shadow:0 0 40px rgba(0,255,213,.3)}
